@@ -6,6 +6,7 @@ from dataclasses import dataclass
 # - what to do with symmetries?
 # - use prio queue
 # - canonicalize variable names, and deduplicate based on it
+# - unify requires disjoint varnames, which I didn't do yet.
 
 type Symbol = str | Id
 
