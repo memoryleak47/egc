@@ -1,5 +1,11 @@
 from dataclasses import dataclass
 
+# TODO next things to be done:
+# - We shouldn't orient all equations towards a new id. Eg. if it already is an Id equation
+# - simplify?
+# - what to do with symmetries?
+# - use prio queue
+
 type Symbol = str | Id
 
 @dataclass(frozen=True)
