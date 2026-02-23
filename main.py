@@ -5,6 +5,7 @@ from dataclasses import dataclass
 # - simplify?
 # - what to do with symmetries?
 # - use prio queue
+# - canonicalize variable names, and deduplicate based on it
 
 type Symbol = str | Id
 
