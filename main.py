@@ -39,6 +39,12 @@ type Term = Node | Var
 # An AppliedId is an id applied to a disjoint set of variables.
 type AppliedId = Node
 
+def is_applied_id(t: Term) -> bool:
+    if not isinstance(t, Node): return False
+    if not isinstance(t.f, Id): return False
+    if not all(isinstance(x, Var) for x in t.args): return False
+    return len(set(t.args)) == len(t.args)
+
 type Equation = (Term, Term)
 
 def vars_of(x):
@@ -133,29 +139,43 @@ def apply_subst(t: Term, subst: dict[Var, Term]):
         return Node(t.f, tuple([apply_subst(a, subst) for a in t.args]))
     return t
 
+def gt(l: Term, r: Term) -> bool:
+    if not is_applied_id(r): return False
+    if not is_applied_id(l): return True
+    if len(l.args) > len(r.args): return True
+    if len(l.args) < len(r.args): return False
+    return l.f.i > r.f.i
+
 class EGC:
     def __init__(self, eqs: list[(Term, Term)]):
         self.actives = [] # (Term, Term)
         self.passives = eqs
         self.next_id = 0
 
+    def add_active(self, e: Equation):
+        print(str(e[0]) + " -> " + str(e[1]))
+        self.actives.append(e)
+        for e2 in self.actives:
+            self.passives.extend(deduce(e, e2))
+            self.passives.extend(deduce(e2, e))
+
     def run(self):
         while self.passives:
            # TODO pop from prio queue in order, later
             lhs, rhs = self.passives.pop()
-            s = vars_of(lhs).intersection(vars_of(rhs))
 
-            i = Node(Id(self.next_id), tuple(s))
-            self.next_id += 1
+            if gt(lhs, rhs):
+                self.add_active((lhs, rhs))
+            elif gt(rhs, lhs):
+                self.add_active((rhs, lhs))
+            else:
+                # TODO handle symmetries
+                s = vars_of(lhs).intersection(vars_of(rhs))
+                i = Node(Id(self.next_id), tuple(s))
+                self.next_id += 1
 
-            print(str(lhs) + " = " + str(rhs) + " --> " + str(i))
-            self.actives.append((lhs, i))
-            self.actives.append((rhs, i))
-
-            for eq1 in [(lhs, i), (rhs, i)]:
-                for eq2 in self.actives:
-                    self.passives.extend(deduce(eq1, eq2))
-                    self.passives.extend(deduce(eq2, eq1))
+                self.add_active((lhs, i))
+                self.add_active((rhs, i))
 
 f = lambda x, y: Node("f", (x, y))
 g = lambda x, y: Node("g", (x, y))
@@ -167,7 +187,7 @@ X = Var(0)
 Y = Var(1)
 
 l = [
-    (f(X, Y), h(Y))
+    (f(X, Y), h(X))
 ]
 
 e = EGC(l)
