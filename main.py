@@ -31,8 +31,6 @@ class EGC:
         self.goals = goals
 
     def add_active(self, e: Equation):
-        e = simplify(e, self.actives)
-        if e[0] == e[1]: return
         e = canon(e)
         if e in self.actives: return
 
@@ -45,8 +43,10 @@ class EGC:
     def run(self):
         while self.passives:
             # TODO pop from prio queue in order, later
-            lhs, rhs = self.passives[0]
+            e = self.passives[0]
             self.passives = self.passives[1:]
+
+            lhs, rhs = simplify(e, self.actives)
             if lhs == rhs: continue
 
             if gt(lhs, rhs):
