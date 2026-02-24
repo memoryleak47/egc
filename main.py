@@ -9,13 +9,17 @@ from canon import *
 # - what to do with symmetries?
 # - use prio queue
 
+# l > r
 def gt(l: Term, r: Term) -> bool:
+    if l == r: return False
+    if not vars_of(l).issuperset(vars_of(r)): return False
+    if isinstance(r, Var): return True
     if not is_applied_id(r): return False
     if not is_applied_id(l): return True
     if len(l.args) > len(r.args): return True
     if len(l.args) < len(r.args): return False
 
-    assert(l.f.i != r.f.i, "symmetries not handled yet!")
+    assert(l.f.i != r.f.i) # symmetries not handled yet!
 
     return l.f.i > r.f.i
 

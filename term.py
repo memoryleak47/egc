@@ -43,6 +43,11 @@ type Goal = (Term, Term) # s != t
 
 def vars_of(x):
     s = set()
+    if isinstance(x, tuple):
+        for a in x:
+            s.update(vars_of(a))
+        return s
+
     if isinstance(x, Var):
         s.add(x)
     elif isinstance(x, Node):
