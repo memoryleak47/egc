@@ -22,7 +22,7 @@ def simplify_term(t: Term, eqs):
             for eq in eqs:
                 lhs, rhs = canon_odd(eq) # The thing we simplify with is odd.
                 subst = pat_match(lhs, pos_get(t, pos))
-                if not subst: continue
+                if subst is None: continue
                 rhs2 = apply_subst(rhs, subst)
                 t = pos_set(t, pos, rhs2)
                 changed = True
