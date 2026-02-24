@@ -6,7 +6,6 @@ from canon import *
 from simplify import *
 
 # TODO next things to be done:
-# - simplify?
 # - what to do with symmetries?
 # - use prio queue
 
@@ -61,6 +60,23 @@ class EGC:
 
                 self.add_active((lhs, i))
                 self.add_active((rhs, i))
+
+            self.check_goals()
+
+    def check_goals(self):
+        goals = []
+        for g in self.goals:
+            g2 = simplify(g, self.actives)
+            if g2[0] == g2[1]:
+                print("Proof found!")
+                print(g)
+                print("simplifies to")
+                print(g2)
+                import sys
+                sys.exit(0)
+            g2 = canon(g2)
+            goals.append(g2)
+        self.goals = goals
 
 eqs, diseqs = parse("example.p")
 e = EGC(eqs, diseqs)
