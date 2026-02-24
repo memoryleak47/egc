@@ -33,6 +33,7 @@ struct State {
     hashcons: HashMap<NodeTerm, BaseTerm>,
 
     passive: MinPrioQueue<usize, ((), ())>, // how to represent terms in the passive set? already interned?
+    goals: Vec<(BaseTerm, BaseTerm)>,
 }
 
 impl State {
@@ -53,6 +54,10 @@ impl State {
 
     fn union(&mut self, b1: BaseTerm, b2: BaseTerm) {
         todo!()
+    }
+
+    fn add_goal(&mut self, x: BaseTerm, y: BaseTerm) {
+        self.goals.push((x, y));
     }
 }
 
