@@ -29,22 +29,52 @@ class EGC:
         self.passives = eqs
         self.next_id = 0
         self.goals = goals
+        self.weights = {} # dict[Id, Polynomial]
 
     def add_active(self, e: Equation):
         e = canon(e)
         if e in self.actives: return
 
         print(str(e[0]) + " -> " + str(e[1]))
+
         self.actives.append(e)
+        self.update_weight(e)
+
         for e2 in self.actives:
             self.passives.extend(deduce(e, e2))
             self.passives.extend(deduce(e2, e))
 
+    def score_passive(self, e: Equation):
+        poly = poly_of(e[0], self.weights) + poly_of(e[1], self.weights)
+        s = poly.constant
+        for (_, n) in poly.vars.items():
+            s += n
+        return s
+
+    def pop_passive(self):
+        best = None
+        best_score = 1000000000000
+        for e in self.passives:
+            score = self.score_passive(e)
+            if score < best_score:
+                best = e
+                best_score = score
+        if best:
+            self.passives.remove(best)
+            return best
+
+    def update_weight(self, e: Equation):
+        body, app_id = e
+        if not is_applied_id(app_id): return
+        app_id, body = canon((app_id, body))
+        i = app_id.f
+        poly = poly_of(body, self.weights)
+        if (i not in self.weights) or poly < self.weights[i]:
+            self.weights[i] = poly
+
     def run(self):
         while self.passives:
-            # TODO pop from prio queue in order, later
-            e = self.passives[0]
-            self.passives = self.passives[1:]
+            e = self.pop_passive()
 
             lhs, rhs = simplify(e, self.actives)
             if lhs == rhs: continue
