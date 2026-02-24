@@ -2,13 +2,12 @@ from dataclasses import dataclass
 from term import *
 from deduce import *
 from parse import *
+from canon import *
 
 # TODO next things to be done:
-# - We shouldn't orient all equations towards a new id. Eg. if it already is an Id equation
 # - simplify?
 # - what to do with symmetries?
 # - use prio queue
-# - canonicalize variable names, and deduplicate based on it
 # - unify requires disjoint varnames, which I didn't do yet.
 
 def gt(l: Term, r: Term) -> bool:
@@ -26,6 +25,9 @@ class EGC:
         self.goals = goals
 
     def add_active(self, e: Equation):
+        e = canon(e)
+        if e in self.actives: return
+
         print(str(e[0]) + " -> " + str(e[1]))
         self.actives.append(e)
         for e2 in self.actives:
@@ -37,7 +39,6 @@ class EGC:
             # TODO pop from prio queue in order, later
             lhs, rhs = self.passives.pop()
             if lhs == rhs: continue
-            if (lhs, rhs) in self.actives: continue
 
             if gt(lhs, rhs):
                 self.add_active((lhs, rhs))
