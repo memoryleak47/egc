@@ -14,6 +14,9 @@ def gt(l: Term, r: Term) -> bool:
     if not is_applied_id(l): return True
     if len(l.args) > len(r.args): return True
     if len(l.args) < len(r.args): return False
+
+    assert(l.f.i != r.f.i, "symmetries not handled yet!")
+
     return l.f.i > r.f.i
 
 class EGC:
