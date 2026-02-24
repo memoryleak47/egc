@@ -3,6 +3,7 @@ from term import *
 from deduce import *
 from parse import *
 from canon import *
+from simplify import *
 
 # TODO next things to be done:
 # - simplify?
@@ -31,6 +32,8 @@ class EGC:
         self.goals = goals
 
     def add_active(self, e: Equation):
+        e = simplify(e, self.actives)
+        if e[0] == e[1]: return
         e = canon(e)
         if e in self.actives: return
 
