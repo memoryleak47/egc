@@ -1,6 +1,10 @@
 from term import *
+from canon import *
 
 def deduce(x: Equation, y: Equation) -> list[Equation]:
+    x = canon_odd(x)
+    y = canon_even(y)
+
     out = []
     for p in positions_of(y[0]):
         subst = unify(x[0], pos_get(y[0], p))

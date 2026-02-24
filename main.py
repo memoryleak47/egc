@@ -8,7 +8,6 @@ from canon import *
 # - simplify?
 # - what to do with symmetries?
 # - use prio queue
-# - unify requires disjoint varnames, which I didn't do yet.
 
 def gt(l: Term, r: Term) -> bool:
     if not is_applied_id(r): return False
