@@ -38,7 +38,8 @@ def is_applied_id(t: Term) -> bool:
     if not all(isinstance(x, Var) for x in t.args): return False
     return len(set(t.args)) == len(t.args)
 
-type Equation = (Term, Term)
+type Equation = (Term, Term) # s = t
+type Goal = (Term, Term) # s != t
 
 def vars_of(x):
     s = set()

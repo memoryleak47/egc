@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from term import *
 from deduce import *
+from parse import *
 
 # TODO next things to be done:
 # - We shouldn't orient all equations towards a new id. Eg. if it already is an Id equation
@@ -18,10 +19,11 @@ def gt(l: Term, r: Term) -> bool:
     return l.f.i > r.f.i
 
 class EGC:
-    def __init__(self, eqs: list[(Term, Term)]):
+    def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)]):
         self.actives = [] # (Term, Term)
         self.passives = eqs
         self.next_id = 0
+        self.goals = goals
 
     def add_active(self, e: Equation):
         print(str(e[0]) + " -> " + str(e[1]))
@@ -50,18 +52,6 @@ class EGC:
                 self.add_active((lhs, i))
                 self.add_active((rhs, i))
 
-f = lambda x, y: Node("f", (x, y))
-g = lambda x, y: Node("g", (x, y))
-h = lambda x: Node("h", (x,))
-a = Node("a", ())
-b = Node("b", ())
-
-X = Var(0)
-Y = Var(1)
-
-l = [
-    (f(X, Y), h(X))
-]
-
-e = EGC(l)
+eqs, diseqs = parse("example.p")
+e = EGC(eqs, diseqs)
 e.run()
