@@ -45,7 +45,8 @@ class EGC:
     def run(self):
         while self.passives:
             # TODO pop from prio queue in order, later
-            lhs, rhs = self.passives.pop()
+            lhs, rhs = self.passives[0]
+            self.passives = self.passives[1:]
             if lhs == rhs: continue
 
             if gt(lhs, rhs):
