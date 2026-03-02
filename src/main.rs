@@ -13,6 +13,7 @@ struct BaseTerm {
 }
 
 // should variables be valid node terms?
+// TODO I probably never want to construct this memory, but rather intern them on construction.
 #[derive(Hash, PartialEq, Eq)]
 struct NodeTerm {
     id: Id,
@@ -45,6 +46,7 @@ impl State {
         // - simplify & check goals (goal simplification could also be done via usages)
     }
 
+    // probably want `add(&mut self, id: Id, args: impl Iterator<Item=BaseTerm> -> BaseTerm`
     fn add(&mut self, node: NodeTerm) -> BaseTerm {
         todo!()
     }
