@@ -3,6 +3,8 @@ pub struct Id(pub i32); // This also includes function symbols.
 // Negative: variables.
 // Non-negative: First function symbols, then fresh ids.
 
+pub type Var = Id;
+
 mod fmt {
     use crate::Id;
     use std::sync::OnceLock;

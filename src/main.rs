@@ -9,7 +9,7 @@ use std::collections::HashMap;
 #[derive(Hash, PartialEq, Eq)]
 struct BaseTerm {
     id: Id,
-    args: Box<[Id]>,
+    args: Box<[Var]>,
 }
 
 // should variables be valid node terms?
