@@ -7,12 +7,9 @@ pub use minqueue::*;
 use std::collections::HashMap;
 
 #[derive(Hash, PartialEq, Eq)]
-struct Var(usize);
-
-#[derive(Hash, PartialEq, Eq)]
-enum BaseTerm {
-    Var(Var),
-    AppId(Id, Box<[Var]>),
+struct BaseTerm {
+    id: Id,
+    args: Box<[Id]>,
 }
 
 // should variables be valid node terms?
