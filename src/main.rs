@@ -1,3 +1,6 @@
+mod id;
+pub use id::*;
+
 mod minqueue;
 pub use minqueue::*;
 
@@ -5,9 +8,6 @@ use std::collections::HashMap;
 
 #[derive(Hash, PartialEq, Eq)]
 struct Var(usize);
-
-#[derive(Hash, PartialEq, Eq)]
-struct Id(usize); // This also includes function symbols.
 
 #[derive(Hash, PartialEq, Eq)]
 enum BaseTerm {
