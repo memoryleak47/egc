@@ -39,12 +39,5 @@ class EGC:
         pass # TODO
 
 eqs, diseqs, sig = parse("../example.p")
-
 eg = EGC(eqs, diseqs, sig)
-
-# for debugging for now!
-for (l, r) in eqs + diseqs:
-    eg.canon(l)
-    eg.canon(r)
-
 eg.run()
