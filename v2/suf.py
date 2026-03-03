@@ -1,25 +1,22 @@
 from dataclasses import dataclass
 
+# Covers both e-class ids (int) and function symbols (str).
 @dataclass(frozen=True)
 class Id:
     i: int
+    s: str|None
 
     def __repr__(self):
-        return "id" + str(self.i)
+        if isinstance(self.v, str):
+            return self.v
+        else:
+            return f"id{self.v}"
 
-# slots are integers
-type Slot = int
-
-class Class:
-    def __init__(self, arity: int):
-        self.group = Group(arity)
-        self.arity = arity
-        self.leader = None
-
+# combination of Node & AppliedId.
 @dataclass(frozen=True)
-class AppliedId:
+class Applied:
     id: Id
-    args: tuple[Slot]
+    args: tuple[Term]
 
     def __repr__(self):
         if self.args:
@@ -27,12 +24,29 @@ class AppliedId:
         else:
             return str(self.id)
 
+@dataclass(frozen=True)
+class Var:
+    i: int
+
+    def __repr__(self):
+        return "X" + str(self.i)
+
+type Term = Applied | Var
+
+type AppliedId = Applied # An Applied with only Vars as args.
+
+class Class:
+    def __init__(self, arity: int):
+        self.group = Group(arity)
+        self.arity = arity
+        self.leader = None
+
 # Reorders the slots a bunch of AppliedIds, so that they are lexicographically minimal.
 # This means that the first id will always have (0, 1, 2, ...) as arguments.
 # Eg. (id2[4, 2, 1], id5[0, 1, 3, 4]) would reorder to
 #     (id2[0, 1, 2], id5[3, 2, 4, 0]
 # The ids themselves stay unchanged.
-def reorder(app_ids: tuple(AppliedId)) -> (dict[Slot, Slot], tuple(AppliedId)):
+def reorder(app_ids: tuple(AppliedId)) -> (dict[Var, Var], tuple(AppliedId)):
     d = {}
     out = []
     for a in app_ids:
@@ -124,7 +138,7 @@ class SlottedUF:
         # If you want to know the symmetries, check the permutation group of the leader.
         self.classes[x].group = None
 
-    def mark_slots_redundant(self, x: AppliedId, slots: set[Slot]):
+    def mark_slots_redundant(self, x: AppliedId, slots: set[Var]):
         x = self.find(x)
 
         redundants = set()
@@ -152,7 +166,7 @@ class SlottedUF:
 
 # a group permutation.
 # Required to express equations like id0[0, 1] = id0[1, 0].
-type Perm = tuple(Slot)
+type Perm = tuple(Var)
 
 def compose(x: Perm, y: Perm) -> Perm:
     return tuple(x[y[i]] for i in range(len(x)))
@@ -178,7 +192,7 @@ class Group:
             if n == len(self.perms):
                 break
 
-    def orbit(self, s: Slot) -> set[Slot]:
+    def orbit(self, s: Var) -> set[Var]:
         orbit = {s}
         for p in self.perms:
             orbit.add(p[s])

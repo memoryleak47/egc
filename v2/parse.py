@@ -21,7 +21,7 @@ def assemble_term(toks) -> (list[str], Term):
         return (toks[1:], Var(i))
     assert(tok[0].islower())
     if toks[1] != "(":
-        return (toks[1:], Node(tok, ()))
+        return (toks[1:], Applied(tok, ()))
     assert(toks[1] == "(")
     toks = toks[2:]
     args = []
@@ -34,7 +34,7 @@ def assemble_term(toks) -> (list[str], Term):
         toks = toks[1:]
     assert(toks[0] == ")")
     toks = toks[1:]
-    t = Node(tok, tuple(args))
+    t = Applied(tok, tuple(args))
     return (toks, t)
 
 def assemble_item(toks, eqs, diseqs) -> list[str]:
