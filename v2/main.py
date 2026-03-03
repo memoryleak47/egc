@@ -1,5 +1,6 @@
 from suf import *
 from parse import *
+from deduce import *
 import heapq
 
 class EGC:
