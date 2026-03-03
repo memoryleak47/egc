@@ -1,17 +1,22 @@
 from suf import *
 from parse import *
+import heapq
 
 class EGC:
     def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)], signature: Signature):
+        # actives are hashcons + unionfind.
+        # Whenever you add anything to those, you'll have to compute CPs from it.
+        # unionfind CPs happen via rebuild/canon, but hashcons CPs need to be added to passives.
+
         self.weights = {} # dict[Id, Polynomial]
+        self.passives = [] # list[(Term, Term)]
 
         self.suf = SlottedUF()
         self.hashcons = {}
 
         # add stringy function symbols
         for f, arity in sig.items():
-            f = Sym(f)
-            self.suf.classes[f] = Class(arity)
+            self.suf.classes[Sym(f)] = Class(arity)
 
         for lhs, rhs in eqs:
             self.union(self.canon(lhs), self.canon(rhs))
