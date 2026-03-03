@@ -21,11 +21,11 @@ class EGC:
             self.suf.classes[Sym(f)] = Class(arity)
 
     def canon(self, t: Term) -> Base:
+        t = self.suf.find(t) # canonicalize outermost id
         if isinstance(t, Var):
             return t
         assert(isinstance(t, Applied))
 
-        t = self.suf.find(t) # canonicalize outermost id
         t = Applied(t.sym, tuple(self.canon(a) for a in t.args)) # canonicalize args
         if is_base(t):
             return t
@@ -36,8 +36,7 @@ class EGC:
                 id_args = tuple(vrange(len(vars_of(t))))
                 sym = self.suf.alloc(len(id_args))
                 rhs = Applied(sym, id_args)
-                self.hashcons[t] = rhs
-                print(f"hashcons: {t} -> {rhs}")
+                self.add_hashcons_eq(t, rhs)
                 # TODO compute CPs from this equation
 
             b = self.hashcons[t]
@@ -48,6 +47,15 @@ class EGC:
             assert(is_base(out))
             return out
 
+    def add_hashcons_eq(self, lhs: Term, rhs: Base):
+        self.hashcons[lhs] = rhs
+        print(f"hashcons: {lhs} -> {rhs}")
+        e1 = (lhs, rhs)
+        for e2 in self.hashcons.items():
+            if e3 := deduce(e1, e2):
+                print(f"new CP: {e3}")
+                self.passives.append(e3)
+
     def rebuild(self):
         hashcons = {}
         for (sh, x) in self.hashcons.items():
@@ -56,7 +64,7 @@ class EGC:
             if sh in hashcons:
                 self.suf.union(hashcons[sh], x)
             else:
-                hashcons[sh] = x
+                hashcons[sh] = x # TODO We also need CPs from those!
         self.hashcons = hashcons
         print("new hashcons:")
         for sh, x in hashcons.items():

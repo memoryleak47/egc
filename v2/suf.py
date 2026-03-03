@@ -45,12 +45,15 @@ class SlottedUF:
     # This find accepts that `x` may be be applied to non-Vars.
     def find(self, x: Base) -> Base:
         if isinstance(x, Var): return x
+
         assert(isinstance(x, Applied))
 
         while True:
             l = self.classes[x.sym].leader
             if l == None:
                 return x
+            if isinstance(l, Var):
+                return Var(x.args[l.i])
             # if id7[0, 1, 2] -> id3[2, 1] is a leader edge, then we want to simplify
             #    id7[a, b, c] -> id3[c, b]
             args = tuple(x.args[a.i] for a in l.args)
