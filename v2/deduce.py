@@ -2,8 +2,20 @@ from term import *
 
 type Subst = dict[Var, Term]
 
+def map_vars(t: Term, f) -> Term:
+    if isinstance(t, Var):
+        return f(t)
+    assert(isinstance(t, Applied))
+    return Applied(t.sym, tuple(map_vars(a, f) for a in t.args))
+
+def map_vars_even(t: Term) -> Term: return map_vars(t, lambda x: Var(x.i*2))
+def map_vars_odd(t: Term) -> Term: return map_vars(t, lambda x: Var(x.i*2 + 1))
+
 # Equation = (Term, Base) in this context
 def deduce(a: Equation, b: Equation) -> Equation|None:
+    a = (map_vars_even(a[0]), map_vars_even(a[1]))
+    b = (map_vars_odd(b[0]), map_vars_odd(b[1]))
+
     if (subst := unify(a[0], b[0])) is None: return
     # subst(a[0]) == subst(b[0])
     # -> subst(a[1]) == subst(b[1])
