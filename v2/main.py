@@ -2,7 +2,7 @@ from suf import *
 from parse import *
 
 class EGC:
-    def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)]):
+    def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)], signature: Signature):
         self.actives = [] # (Term, Term)
         self.passives = eqs
         self.next_id = 0
@@ -12,14 +12,15 @@ class EGC:
         self.suf = SlottedUF()
         self.hashcons = {}
 
+        # add stringy function symbols
+        for f, arity in sig.items():
+            f = Sym(f)
+            self.suf.classes[f] = Class(arity)
+
     def canon(self, t: Term) -> Base:
         if isinstance(t, Var):
             return t
         assert(isinstance(t, Applied))
-
-        # create new class for strings.
-        if isinstance(t.sym, str) and t.sym not in self.suf.classes:
-            self.suf.classes[t.sym] = Class(len(t.args))
 
         t = self.suf.find(t) # canonicalize outermost id
         t = Applied(t.sym, tuple(self.canon(a) for a in t.args)) # canonicalize args
@@ -32,13 +33,13 @@ class EGC:
     def run(self):
         pass # TODO
 
-eqs, diseqs = parse("../example.p")
+eqs, diseqs, sig = parse("../example.p")
 
-e = EGC(eqs, diseqs)
+eg = EGC(eqs, diseqs, sig)
 
 # for debugging for now!
 for (l, r) in eqs + diseqs:
-    e.canon(l)
-    e.canon(r)
+    eg.canon(l)
+    eg.canon(r)
 
-e.run()
+eg.run()

@@ -5,6 +5,9 @@ from dataclasses import dataclass
 class Sym:
     v: int|str
 
+    def __post_init__(self):
+        assert(isinstance(self.v, int) or isinstance(self.v, str))
+
     def __repr__(self):
         if isinstance(self.v, str):
             return self.v
@@ -16,6 +19,10 @@ class Sym:
 class Applied:
     sym: Sym
     args: tuple[Term]
+
+    def __post_init__(self):
+        assert(isinstance(self.sym, Sym))
+        assert(isinstance(self.args, tuple))
 
     def __repr__(self):
         if self.args:

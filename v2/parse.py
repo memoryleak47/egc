@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from term import *
 
+type Equation = (Term, Term)
+type Goal = (Term, Term)
+type Signature = dict[str, int] # maps symbol to arity
+
 def tokenize(s: str) -> list[str]:
     s = s.replace("(", " ( ")
     s = s.replace("!", " ! ")
@@ -14,19 +18,27 @@ def tokenize(s: str) -> list[str]:
         s = s.replace("  ", " ")
     return s.split()
 
-def assemble_term(toks) -> (list[str], Term):
+def add_to_signature(f, arity, signature):
+    assert(isinstance(f, str))
+    assert(isinstance(arity, int))
+    if f in signature:
+        assert(arity == signature[f])
+    signature[f] = arity
+
+def assemble_term(toks, signature) -> (list[str], Term):
     tok = toks[0]
     if tok[0] == "X":
         i = int(tok[1:])
         return (toks[1:], Var(i))
     assert(tok[0].islower())
     if toks[1] != "(":
-        return (toks[1:], Applied(tok, ()))
+        add_to_signature(tok, 0, signature)
+        return (toks[1:], Applied(Sym(tok), ()))
     assert(toks[1] == "(")
     toks = toks[2:]
     args = []
     while True:
-        toks, ch = assemble_term(toks)
+        toks, ch = assemble_term(toks, signature)
         args.append(ch)
         if toks[0] == ")":
             break
@@ -34,35 +46,37 @@ def assemble_term(toks) -> (list[str], Term):
         toks = toks[1:]
     assert(toks[0] == ")")
     toks = toks[1:]
-    t = Applied(tok, tuple(args))
+    add_to_signature(tok, len(args), signature)
+    t = Applied(Sym(tok), tuple(args))
     return (toks, t)
 
-def assemble_item(toks, eqs, diseqs) -> list[str]:
+def assemble_item(toks, eqs, diseqs, signature) -> list[str]:
     # cnf(a,axiom, lhs = rhs).
     assert(toks[0] == "cnf")
     assert(toks[1] == "(")
     assert(toks[3] == ",")
     assert(toks[4] == "axiom")
     assert(toks[5] == ",")
-    toks, lhs = assemble_term(toks[6:])
+    toks, lhs = assemble_term(toks[6:], signature)
     if toks[0] == "!" and toks[1] == "=":
         target = diseqs
         toks = toks[2:]
     elif toks[0] == "=":
         target = eqs
         toks = toks[1:]
-    toks, rhs = assemble_term(toks)
+    toks, rhs = assemble_term(toks, signature)
     assert(toks[0] == ")")
     assert(toks[1] == ".")
     target.append((lhs, rhs))
     return toks[2:]
 
-def assemble(toks: list[str]) -> (Equation, Goal):
+def assemble(toks: list[str]) -> (Equation, Goal, Signature):
     eqs = []
     diseqs = []
+    signature = {}
     while toks:
-        toks = assemble_item(toks, eqs, diseqs)
-    return eqs, diseqs
+        toks = assemble_item(toks, eqs, diseqs, signature)
+    return eqs, diseqs, signature
 
 def parse(filename):
     lines = open(filename).read()
