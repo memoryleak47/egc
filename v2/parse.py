@@ -1,5 +1,5 @@
-from term import *
 from dataclasses import dataclass
+from term import *
 
 def tokenize(s: str) -> list[str]:
     s = s.replace("(", " ( ")

@@ -1,9 +1,17 @@
 from suf import *
+from parse import *
 
-type Base = AppliedId | Slot
+class EGC:
+    def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)]):
+        self.actives = [] # (Term, Term)
+        self.passives = eqs
+        self.next_id = 0
+        self.goals = goals
+        self.weights = {} # dict[Id, Polynomial]
 
-type Node = AppliedId | Slot | ... # TODO
+    def run(self):
+        pass # TODO
 
-class State:
-    suf: SlottedUF
-    hashcons: dict[Term, Base]
+eqs, diseqs = parse("../example.p")
+e = EGC(eqs, diseqs)
+e.run()
