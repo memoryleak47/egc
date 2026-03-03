@@ -33,8 +33,8 @@ class EGC:
         if is_base(t):
             return t
         else:
-            d, args2 = reorder(t.args)
-            t = Applied(t.sym, args2)
+            d, args = reorder(t.args)
+            t = Applied(t.sym, args)
             if t in self.hashcons:
                 b = self.hashcons[t]
                 if isinstance(b, Var): return d[b]
@@ -43,7 +43,8 @@ class EGC:
                 return Applied(b.f, tuple(d[a] for a in b.args))
 
             sym = self.suf.alloc(len(args))
-            self.hashcons[sh] = sym # TODO respect d
+            self.hashcons[t] = sym # TODO respect d
+            return Applied(sym, args)
             # TODO compute CPs
 
     def union(self, x: Base, y: Base):

@@ -9,22 +9,23 @@ class Class:
         self.arity = arity
         self.leader = None
 
-# Reorders the slots a bunch of AppliedIds, so that they are lexicographically minimal.
-# This means that the first id will always have (0, 1, 2, ...) as arguments.
-# Eg. (id2[4, 2, 1], id5[0, 1, 3, 4]) would reorder to
-#     (id2[0, 1, 2], id5[3, 2, 4, 0]
-# The ids themselves stay unchanged.
-def reorder(app_ids: tuple(AppliedId)) -> (dict[Var, Var], tuple(AppliedId)):
+# Reorders the slots a bunch of Bases, so that they are lexicographically minimal.
+def reorder(bases: tuple(Base)) -> (dict[Var, Var], tuple(Base)):
     d = {}
     out = []
-    for a in app_ids:
-        args = []
-        for s in a.args:
-            if s not in d:
-                d[s] = len(d)
-            args.append(d[s])
-        args = tuple(args)
-        out.append(Applied(a.sym, args))
+    for a in bases:
+        if isinstance(a, Var):
+            if a not in d:
+                d[a] = Var(len(d))
+            out.append(d[a])
+        else:
+            args = []
+            for s in a.args:
+                if s not in d:
+                    d[s] = len(d)
+                args.append(d[s])
+            args = tuple(args)
+            out.append(Applied(a.sym, args))
     return (d, tuple(out))
 
 class SlottedUF:
@@ -41,8 +42,11 @@ class SlottedUF:
         self.classes[i] = Class(arity)
         return i
 
-    # This find accepts that `x` maybe be applied to non-Vars.
-    def find(self, x: Applied) -> Applied:
+    # This find accepts that `x` may be be applied to non-Vars.
+    def find(self, x: Base) -> Base:
+        if isinstance(x, Var): return x
+        assert(isinstance(x, Applied))
+
         while True:
             l = self.classes[x.sym].leader
             if l == None:
@@ -52,7 +56,8 @@ class SlottedUF:
             args = tuple(x.args[a] for a in l.args)
             x = Applied(l.sym, args)
 
-    def union(self, x: AppliedId, y: AppliedId):
+    def union(self, x: Base, y: Base):
+        # TODO support the case where x or y is a variable.
         while True:
             x = self.find(x)
             y = self.find(y)
