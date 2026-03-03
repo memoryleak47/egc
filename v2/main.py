@@ -16,8 +16,13 @@ class EGC:
         if isinstance(t, Var):
             return t
         assert(isinstance(t, Applied))
+
+        # create new class for strings.
+        if isinstance(t.sym, str) and t.sym not in self.suf.classes:
+            self.suf.classes[t.sym] = Class(len(t.args))
+
         t = self.suf.find(t) # canonicalize outermost id
-        t = Applied(t.f, tuple(self.canon(a) for a in t.args)) # canonicalize args
+        t = Applied(t.sym, tuple(self.canon(a) for a in t.args)) # canonicalize args
         if is_base(t):
             return t
         else:

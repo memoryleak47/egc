@@ -24,30 +24,33 @@ def reorder(app_ids: tuple(AppliedId)) -> (dict[Var, Var], tuple(AppliedId)):
                 d[s] = len(d)
             args.append(d[s])
         args = tuple(args)
-        out.append(Applied(a.id, args))
+        out.append(Applied(a.sym, args))
     return (d, tuple(out))
 
 class SlottedUF:
-    classes: dict[Id, Class]
+    classes: dict[Sym, Class]
+    next_id: int
 
     def __init__(self):
         self.classes = {}
+        self.next_id = 0
 
-    def alloc(self, arity: int) -> Id:
-        i = Id(len(self.classes))
+    def alloc(self, arity: int) -> Sym:
+        i = Sym(self.next_id)
+        self.next_id += 1
         self.classes[i] = Class(arity)
         return i
 
     # This find accepts that `x` maybe be applied to non-Vars.
     def find(self, x: Applied) -> Applied:
         while True:
-            l = self.classes[x.id].leader
+            l = self.classes[x.sym].leader
             if l == None:
                 return x
             # if id7[0, 1, 2] -> id3[2, 1] is a leader edge, then we want to simplify
             #    id7[a, b, c] -> id3[c, b]
             args = tuple(x.args[a] for a in l.args)
-            x = Applied(l.id, args)
+            x = Applied(l.sym, args)
 
     def union(self, x: AppliedId, y: AppliedId):
         while True:
@@ -71,28 +74,28 @@ class SlottedUF:
 
         _, (x, y) = reorder((x, y))
 
-        if x.id == y.id:
+        if x.sym == y.sym:
             # symmetries!
             # Example: if id3[0, 1] = id3[1, 0], we need to store this symmetry [1, 0] in the group of id3!
-            self.classes[x.id].group.add(y.args)
+            self.classes[x.sym].group.add(y.args)
         else:
-            self.add_uf_edge(x.id, y)
+            self.add_uf_edge(x.sym, y)
 
     # Makes x point to y in the unionfind.
     def add_uf_edge(self, x: Id, y: AppliedId):
         self.classes[x].leader = y
 
         x_arity = self.classes[x].arity
-        y_arity = self.classes[y.id].arity
+        y_arity = self.classes[y.sym].arity
 
-        # y.id inherits the symmetries from x
+        # y.sym inherits the symmetries from x
         identity = tuple(range(x_arity))
         for p in self.classes[x].group.perms:
             # The equation 'lhs = rhs' corresponding to this permutation.
             lhs = Applied(x, identity)
             rhs = Applied(x, p)
 
-            # Tranforming the equation from x to y.id.
+            # Tranforming the equation from x to y.sym.
             lhs = self.find(lhs)
             rhs = self.find(rhs)
 
@@ -101,7 +104,7 @@ class SlottedUF:
             for s in rhs.args:
                 assert(s < y_arity)
 
-            self.classes[y.id].group.add(rhs.args)
+            self.classes[y.sym].group.add(rhs.args)
 
         # x is now "non-canonical", thus it has no reason to a group.
         # If you want to know the symmetries, check the permutation group of the leader.
@@ -114,24 +117,24 @@ class SlottedUF:
         for s in slots:
             if s not in x.args: continue
             s = x.args.index(s)
-            redundants.update(self.classes[x.id].group.orbit(s))
+            redundants.update(self.classes[x.sym].group.orbit(s))
 
         if len(redundants) == 0:
             return
 
-        old_arity = self.classes[x.id].arity
+        old_arity = self.classes[x.sym].arity
         new_arity = old_arity - len(redundants)
         y = self.alloc(new_arity)
         args = tuple(s for s in range(old_arity) if s not in redundants)
-        self.add_uf_edge(x.id, Applied(y, args))
+        self.add_uf_edge(x.sym, Applied(y, args))
 
     def is_equal(self, x: AppliedId, y: AppliedId) -> bool:
         x = self.find(x)
         y = self.find(y)
-        if x.id != y.id:
+        if x.sym != y.sym:
             return False
         _, (x, y) = reorder((x, y))
-        return self.classes[x.id].group.contains(y.args)
+        return self.classes[x.sym].group.contains(y.args)
 
 # a group permutation.
 # Required to express equations like id0[0, 1] = id0[1, 0].

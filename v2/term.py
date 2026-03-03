@@ -1,11 +1,9 @@
 from dataclasses import dataclass
 
-# Covers both e-class ids (int) and function symbols (str).
-# TODO how to express this?
+# Symbols: Covers both e-class ids (int) and function symbols (str).
 @dataclass(frozen=True)
-class Id:
-    i: int
-    s: str|None
+class Sym:
+    v: int|str
 
     def __repr__(self):
         if isinstance(self.v, str):
@@ -16,14 +14,14 @@ class Id:
 # combination of Node & AppliedId.
 @dataclass(frozen=True)
 class Applied:
-    id: Id
+    sym: Sym
     args: tuple[Term]
 
     def __repr__(self):
         if self.args:
-            return str(self.id) + "(" + ", ".join(map(str, self.args)) + ")"
+            return str(self.sym) + "(" + ", ".join(map(str, self.args)) + ")"
         else:
-            return str(self.id)
+            return str(self.sym)
 
 @dataclass(frozen=True)
 class Var:
