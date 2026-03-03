@@ -55,3 +55,17 @@ def is_base(t: Term) -> bool:
         if a in s: return False
         s.add(a)
     return True
+
+def vars_of(t: Term) -> set[Var]:
+    if isinstance(t, Var):
+        return {t}
+    assert(isinstance(t, Applied))
+    s = set()
+    for x in t.args:
+        s.update(vars_of(x))
+    return s
+
+def base_lt(l: Base, r: Base) -> bool:
+    if isinstance(l, Var) and not isinstance(r, Var): return True
+    if isinstance(r, Var) and not isinstance(l, Var): return False
+    return l.sym < r.sym
