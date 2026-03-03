@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 # Covers both e-class ids (int) and function symbols (str).
+# TODO how to express this?
 @dataclass(frozen=True)
 class Id:
     i: int

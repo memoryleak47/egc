@@ -24,7 +24,7 @@ def reorder(app_ids: tuple(AppliedId)) -> (dict[Var, Var], tuple(AppliedId)):
                 d[s] = len(d)
             args.append(d[s])
         args = tuple(args)
-        out.append(AppliedId(a.id, args))
+        out.append(Applied(a.id, args))
     return (d, tuple(out))
 
 class SlottedUF:
@@ -38,7 +38,8 @@ class SlottedUF:
         self.classes[i] = Class(arity)
         return i
 
-    def find(self, x: AppliedId) -> AppliedId:
+    # This find accepts that `x` maybe be applied to non-Vars.
+    def find(self, x: Applied) -> Applied:
         while True:
             l = self.classes[x.id].leader
             if l == None:
@@ -46,7 +47,7 @@ class SlottedUF:
             # if id7[0, 1, 2] -> id3[2, 1] is a leader edge, then we want to simplify
             #    id7[a, b, c] -> id3[c, b]
             args = tuple(x.args[a] for a in l.args)
-            x = AppliedId(l.id, args)
+            x = Applied(l.id, args)
 
     def union(self, x: AppliedId, y: AppliedId):
         while True:
@@ -88,8 +89,8 @@ class SlottedUF:
         identity = tuple(range(x_arity))
         for p in self.classes[x].group.perms:
             # The equation 'lhs = rhs' corresponding to this permutation.
-            lhs = AppliedId(x, identity)
-            rhs = AppliedId(x, p)
+            lhs = Applied(x, identity)
+            rhs = Applied(x, p)
 
             # Tranforming the equation from x to y.id.
             lhs = self.find(lhs)
@@ -122,7 +123,7 @@ class SlottedUF:
         new_arity = old_arity - len(redundants)
         y = self.alloc(new_arity)
         args = tuple(s for s in range(old_arity) if s not in redundants)
-        self.add_uf_edge(x.id, AppliedId(y, args))
+        self.add_uf_edge(x.id, Applied(y, args))
 
     def is_equal(self, x: AppliedId, y: AppliedId) -> bool:
         x = self.find(x)
