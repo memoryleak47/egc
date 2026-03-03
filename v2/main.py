@@ -72,6 +72,7 @@ class EGC:
 
     def run(self):
         while len(self.passives) > 0:
+            self.dump()
             x, y = self.passives.pop(0)
             x = self.canon(x)
             y = self.canon(y)
@@ -90,6 +91,16 @@ class EGC:
             print(f"Goal {a} = {b}")
             goals.append((a, b))
         self.goals = goals
+
+    def dump(self):
+        print("--- DUMP:")
+        for l, r in self.hashcons.items():
+            print(f"hashcons: {l} -> {r}")
+        for (s, c) in self.suf.classes.items():
+            args = tuple(vrange(c.arity))
+            s = Applied(s, args)
+            if c.leader is not None:
+                print(f"unionfind: {s} -> {c.leader}")
 
 eqs, diseqs, sig = parse("../example.p")
 eg = EGC(eqs, diseqs, sig)
