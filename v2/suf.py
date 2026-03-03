@@ -53,7 +53,7 @@ class SlottedUF:
                 return x
             # if id7[0, 1, 2] -> id3[2, 1] is a leader edge, then we want to simplify
             #    id7[a, b, c] -> id3[c, b]
-            args = tuple(x.args[a] for a in l.args)
+            args = tuple(x.args[a.i] for a in l.args)
             x = Applied(l.sym, args)
 
     def union(self, x: Base, y: Base):
@@ -111,7 +111,7 @@ class SlottedUF:
                 _, (lhs, rhs) = reorder((lhs, rhs))
 
                 for s in rhs.args:
-                    assert(s < y_arity)
+                    assert(s.i < y_arity)
 
                 self.classes[y.sym].group.add(rhs.args)
 
@@ -119,7 +119,7 @@ class SlottedUF:
         # If you want to know the symmetries, check the permutation group of the leader.
         self.classes[x].group = None
 
-    def mark_slots_redundant(self, x: AppliedId, slots: set[Var]):
+    def mark_slots_redundant(self, x: Base, slots: set[Var]):
         x = self.find(x)
 
         redundants = set()
