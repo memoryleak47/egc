@@ -3,10 +3,7 @@ from parse import *
 
 class EGC:
     def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)], signature: Signature):
-        self.actives = [] # (Term, Term)
-        self.passives = eqs
         self.next_id = 0
-        self.goals = goals
         self.weights = {} # dict[Id, Polynomial]
 
         self.suf = SlottedUF()
@@ -16,6 +13,11 @@ class EGC:
         for f, arity in sig.items():
             f = Sym(f)
             self.suf.classes[f] = Class(arity)
+
+        for lhs, rhs in eqs:
+            self.union(self.canon(lhs), self.canon(rhs))
+
+        self.goals = [(self.canon(x), self.canon(y)) for x, y in goals]
 
     def canon(self, t: Term) -> Base:
         if isinstance(t, Var):
@@ -29,6 +31,9 @@ class EGC:
         else:
             # TODO hashcons
             pass
+
+    def union(self, x: Base, y: Base):
+        self.suf.union(x, y)
 
     def run(self):
         pass # TODO

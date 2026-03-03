@@ -14,6 +14,11 @@ class Sym:
         else:
             return f"id{self.v}"
 
+    def __lt__(self, other: Sym):
+        if isinstance(self.v, str) and isinstance(other.v, int): return True
+        if isinstance(self.v, int) and isinstance(other.v, str): return False
+        return self.v < other.v
+
 # combination of Node & AppliedId.
 @dataclass(frozen=True)
 class Applied:

@@ -72,6 +72,8 @@ class SlottedUF:
 
         if self.is_equal(x, y): return
 
+        if y.sym > x.sym: x, y = y, x
+        # now x > y
         _, (x, y) = reorder((x, y))
 
         if x.sym == y.sym:
