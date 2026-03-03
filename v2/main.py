@@ -3,7 +3,6 @@ from parse import *
 
 class EGC:
     def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)], signature: Signature):
-        self.next_id = 0
         self.weights = {} # dict[Id, Polynomial]
 
         self.suf = SlottedUF()
