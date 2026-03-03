@@ -8,11 +8,11 @@ class EGC:
         # Whenever you add anything to those, you'll have to compute CPs from it.
         # unionfind CPs happen via rebuild/canon, but hashcons CPs need to be added to passives.
 
-        self.weights = {} # dict[Id, Polynomial]
+        self.weights = {} # dict[Sym, Polynomial]
         self.passives = [] # list[(Term, Term)]
 
         self.suf = SlottedUF()
-        self.hashcons = {}
+        self.hashcons = {} # dict[Applied, Sym]
 
         # add stringy function symbols
         for f, arity in sig.items():
@@ -33,8 +33,18 @@ class EGC:
         if is_base(t):
             return t
         else:
-            # TODO hashcons
-            pass
+            d, args2 = reorder(t.args)
+            t = Applied(t.sym, args2)
+            if t in self.hashcons:
+                b = self.hashcons[t]
+                if isinstance(b, Var): return d[b]
+                assert(isinstance(b, Applied))
+                # TODO d correctly applied?
+                return Applied(b.f, tuple(d[a] for a in b.args))
+
+            sym = self.suf.alloc(len(args))
+            self.hashcons[sh] = sym # TODO respect d
+            # TODO compute CPs
 
     def union(self, x: Base, y: Base):
         self.suf.union(x, y)
