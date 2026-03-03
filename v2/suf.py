@@ -94,17 +94,18 @@ class SlottedUF:
     def add_uf_edge(self, x: Sym, y: Base):
         assert(isinstance(x, Sym))
         assert(is_base(y))
+        x_arity = self.classes[x].arity
+        identity = tuple(vrange(x_arity))
+        lhs = Applied(x, identity)
+        print(f"unionfind: {lhs} -> {y}")
         self.classes[x].leader = y
 
         if not isinstance(y, Var):
-            x_arity = self.classes[x].arity
             y_arity = self.classes[y.sym].arity
 
             # y.sym inherits the symmetries from x
-            identity = tuple(vrange(x_arity))
             for p in self.classes[x].group.perms:
                 # The equation 'lhs = rhs' corresponding to this permutation.
-                lhs = Applied(x, identity)
                 rhs = Applied(x, p)
 
                 # Tranforming the equation from x to y.sym.
@@ -127,7 +128,12 @@ class SlottedUF:
 
         x = self.find(x)
 
-        # TODO handle variable redundancy, which proves any goal.
+        if isinstance(x, Var):
+            if x.var in slots:
+                raise "Proof found via X = Y"
+            else:
+                return
+
         assert(isinstance(x, Applied))
 
         redundants = set()
@@ -161,7 +167,7 @@ class SlottedUF:
 type Perm = tuple(Var)
 
 def compose(x: Perm, y: Perm) -> Perm:
-    return tuple(x[y[i]] for i in vrange(len(x)))
+    return tuple(x[y[i.i].i] for i in vrange(len(x)))
 
 # The most naive implementation of a permutation group: A set of permutations that is closed under composition.
 class Group:

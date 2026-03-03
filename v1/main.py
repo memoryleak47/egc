@@ -109,6 +109,6 @@ class EGC:
             goals.append(g2)
         self.goals = goals
 
-eqs, diseqs = parse("example.p")
+eqs, diseqs = parse("../example.p")
 e = EGC(eqs, diseqs)
 e.run()

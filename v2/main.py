@@ -9,7 +9,8 @@ class EGC:
         # unionfind CPs happen via rebuild/canon, but hashcons CPs need to be added to passives.
 
         self.weights = {} # dict[Sym, Polynomial]
-        self.passives = [] # list[(Term, Term)]
+        self.passives = eqs # set of non-interned terms
+        self.goals = goals
 
         self.suf = SlottedUF()
         self.hashcons = {} # dict[Applied, Sym]
@@ -17,11 +18,6 @@ class EGC:
         # add stringy function symbols
         for f, arity in sig.items():
             self.suf.classes[Sym(f)] = Class(arity)
-
-        for lhs, rhs in eqs:
-            self.union(self.canon(lhs), self.canon(rhs))
-
-        self.goals = [(self.canon(x), self.canon(y)) for x, y in goals]
 
     def canon(self, t: Term) -> Base:
         if isinstance(t, Var):
@@ -35,27 +31,56 @@ class EGC:
         else:
             d, args = reorder(t.args)
             t = Applied(t.sym, args)
-            if t in self.hashcons:
-                b = self.hashcons[t]
-                if isinstance(b, Var): return d[b]
-                assert(isinstance(b, Applied))
-                # TODO d correctly applied?
-                out = Applied(b.f, tuple(d[a] for a in b.args))
-                assert(is_base(out))
-                return out
+            if t not in self.hashcons:
+                id_args = tuple(vrange(len(vars_of(t))))
+                sym = self.suf.alloc(len(id_args))
+                rhs = Applied(sym, id_args)
+                self.hashcons[t] = rhs
+                print(f"hashcons: {t} -> {rhs}")
+                # TODO compute CPs from this equation
 
-            sym = self.suf.alloc(len(args))
-            self.hashcons[t] = sym # TODO respect d
-            out = Applied(sym, args)
+            b = self.hashcons[t]
+            if isinstance(b, Var): return d[b]
+            assert(isinstance(b, Applied))
+            # TODO d correctly applied?
+            out = Applied(b.sym, tuple(d[a] for a in b.args))
             assert(is_base(out))
             return out
-            # TODO compute CPs
 
-    def union(self, x: Base, y: Base):
-        self.suf.union(x, y)
+    def rebuild(self):
+        hashcons = {}
+        for (sh, x) in self.hashcons.items():
+            sh = self.shape(sh) # TODO
+            x = self.canon(x)
+            if sh in hashcons:
+                self.suf.union(hashcons[sh], x)
+            else:
+                hashcons[sh] = x
+        self.hashcons = hashcons
+        print("new hashcons:")
+        for sh, x in hashcons.items():
+            print(f"new hashcons: {t} -> {rhs}")
 
     def run(self):
-        pass # TODO
+        while len(self.passives) > 0:
+            x, y = self.passives.pop(0)
+            x = self.canon(x)
+            y = self.canon(y)
+            self.suf.union(x, y)
+
+        self.check_goals()
+        #self.rebuild()
+
+    def check_goals(self):
+        goals = []
+        for a, b in self.goals:
+            a = self.canon(a)
+            b = self.canon(b)
+            if self.suf.is_equal(a, b):
+                raise "proof found!"
+            print(f"Goal {a} = {b}")
+            goals.append((a, b))
+        self.goals = goals
 
 eqs, diseqs, sig = parse("../example.p")
 eg = EGC(eqs, diseqs, sig)
