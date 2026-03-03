@@ -32,3 +32,15 @@ class Var:
         return "X" + str(self.i)
 
 type Term = Applied | Var
+
+type Base = Term # A base term. Either an AppliedId or a Var.
+
+def is_base(t: Term) -> bool:
+    if isinstance(t, Var): return True
+    assert(isinstance(t, Applied))
+    s = set()
+    for a in t.args:
+        if not isinstance(a, Var): return False
+        if a in s: return False
+        s.add(a)
+    return True

@@ -9,6 +9,20 @@ class EGC:
         self.goals = goals
         self.weights = {} # dict[Id, Polynomial]
 
+        self.hashcons = {}
+
+    def canon(self, t: Term) -> Base:
+        if isinstance(t, Var):
+            return t
+        assert(isinstance(t, Applied))
+        fcanon = self.canon(Applied(t.f, map(Var, range(len(t.args)))))
+        t = Applied(t.f, tuple(self.canon(a) for a in t.args))
+        if is_base(t):
+            return t
+        else:
+            # TODO hashcons
+            pass
+
     def run(self):
         pass # TODO
 
