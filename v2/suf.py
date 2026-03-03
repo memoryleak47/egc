@@ -57,6 +57,9 @@ class SlottedUF:
             x = Applied(l.sym, args)
 
     def union(self, x: Base, y: Base):
+        assert(is_base(x))
+        assert(is_base(y))
+
         while True:
             x = self.find(x)
             y = self.find(y)
@@ -120,7 +123,12 @@ class SlottedUF:
         self.classes[x].group = None
 
     def mark_slots_redundant(self, x: Base, slots: set[Var]):
+        assert(is_base(x))
+
         x = self.find(x)
+
+        # TODO handle variable redundancy, which proves any goal.
+        assert(isinstance(x, Applied))
 
         redundants = set()
         for s in slots:

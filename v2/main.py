@@ -40,11 +40,15 @@ class EGC:
                 if isinstance(b, Var): return d[b]
                 assert(isinstance(b, Applied))
                 # TODO d correctly applied?
-                return Applied(b.f, tuple(d[a] for a in b.args))
+                out = Applied(b.f, tuple(d[a] for a in b.args))
+                assert(is_base(out))
+                return out
 
             sym = self.suf.alloc(len(args))
             self.hashcons[t] = sym # TODO respect d
-            return Applied(sym, args)
+            out = Applied(sym, args)
+            assert(is_base(out))
+            return out
             # TODO compute CPs
 
     def union(self, x: Base, y: Base):
