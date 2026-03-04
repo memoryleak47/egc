@@ -14,14 +14,20 @@ def gt(l: Term, r: Term) -> bool:
     if l == r: return False
     if not vars_of(l).issuperset(vars_of(r)): return False
     if isinstance(r, Var): return True
-    if not is_applied_id(r): return False
-    if not is_applied_id(l): return True
+    if not is_applied_sym(r): return False
+    if not is_applied_sym(l): return True
     if len(l.args) > len(r.args): return True
     if len(l.args) < len(r.args): return False
 
-    assert(l.f.i != r.f.i) # symmetries not handled yet!
+    assert(l.f != r.f) # symmetries not handled yet!
 
-    return l.f.i > r.f.i
+    return sym_gt(l.f, r.f)
+
+def sym_gt(l: Symbol, r: Symbol) -> bool:
+    # int > str
+    if isinstance(l, int) and isinstance(r, str): return True
+    if isinstance(l, str) and isinstance(r, int): return False
+    return l > r
 
 class EGC:
     def __init__(self, eqs: list[(Term, Term)], goals: list[(Term, Term)]):
@@ -65,7 +71,7 @@ class EGC:
 
     def update_weight(self, e: Equation):
         body, app_id = e
-        if not is_applied_id(app_id): return
+        if not is_applied_sym(app_id): return
         app_id, body = canon((app_id, body))
         i = app_id.f
         poly = poly_of(body, self.weights)

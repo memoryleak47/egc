@@ -29,12 +29,11 @@ class Var:
 
 type Term = Node | Var
 
-# An AppliedId is an id applied to a disjoint set of variables.
-type AppliedId = Node
+# An AppliedSym is a sym applied to a disjoint set of variables.
+type AppliedSym = Node
 
-def is_applied_id(t: Term) -> bool:
+def is_applied_sym(t: Term) -> bool:
     if not isinstance(t, Node): return False
-    if not isinstance(t.f, Id): return False
     if not all(isinstance(x, Var) for x in t.args): return False
     return len(set(t.args)) == len(t.args)
 
