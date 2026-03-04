@@ -129,24 +129,25 @@ class SlottedUF:
         # If you want to know the symmetries, check the permutation group of the leader.
         self.classes[x].group = None
 
-    def mark_slots_redundant(self, x: Base, slots: set[Var]):
+    def mark_slots_redundant(self, x: Base, redundants: set[Var]):
         assert(is_base(x))
 
         x = self.find(x)
 
         if isinstance(x, Var):
-            if x in slots:
+            if x in redundants:
                 raise "Proof found via X = Y"
             else:
                 return
 
         assert(isinstance(x, Applied))
 
-        redundants = set()
-        for s in slots:
+        redundants2 = set()
+        for s in redundants:
             if s not in x.args: continue
             s = x.args.index(s)
-            redundants.update(self.classes[x.sym].group.orbit(s))
+            redundants2.update(self.classes[x.sym].group.orbit(s))
+        redundants = redundants2
 
         if len(redundants) == 0:
             return
