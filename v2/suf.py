@@ -7,26 +7,29 @@ class Class:
     def __init__(self, arity: int):
         self.group = Group(arity)
         self.arity = arity
-        self.leader = None
+        self.leader = None # Base term that is equivalent to this class with its default instantiation (X0, ..., Xarity).
 
 # Reorders the slots a bunch of Bases, so that they are lexicographically minimal.
+# d maps the original names to the "shape" ones
 def reorder(bases: tuple(Base)) -> (dict[Var, Var], tuple(Base)):
     d = {}
+    for b in bases:
+        for v in var_sequence(b):
+            if v not in d:
+                d[v] = Var(len(d))
+
+    out = tuple(apply_subst(a, d) for a in bases)
+
+    return d, out
+
+def var_sequence(t: Term) -> list[Var]:
+    if isinstance(t, Var):
+        return [t]
+    assert(isinstance(t, Applied))
     out = []
-    for a in bases:
-        if isinstance(a, Var):
-            if a not in d:
-                d[a] = Var(len(d))
-            out.append(d[a])
-        else:
-            args = []
-            for s in a.args:
-                if s not in d:
-                    d[s] = Var(len(d))
-                args.append(d[s])
-            args = tuple(args)
-            out.append(Applied(a.sym, args))
-    return (d, tuple(out))
+    for x in t.args:
+        out += var_sequence(x)
+    return out
 
 class SlottedUF:
     classes: dict[Sym, Class]
@@ -132,7 +135,7 @@ class SlottedUF:
         x = self.find(x)
 
         if isinstance(x, Var):
-            if x.var in slots:
+            if x in slots:
                 raise "Proof found via X = Y"
             else:
                 return

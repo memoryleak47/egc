@@ -14,7 +14,7 @@ class EGC:
         self.goals = goals
 
         self.suf = SlottedUF()
-        self.hashcons = {} # dict[Applied, Sym]
+        self.hashcons = {} # dict[Applied, Base]; hashcons should behave like an identity function semantically
 
         # add stringy function symbols
         for f, arity in sig.items():
@@ -37,13 +37,9 @@ class EGC:
                 sym = self.suf.alloc(len(id_args))
                 rhs = Applied(sym, id_args)
                 self.add_hashcons_eq(t, rhs)
-                # TODO compute CPs from this equation
 
             b = self.hashcons[t]
-            if isinstance(b, Var): return d[b]
-            assert(isinstance(b, Applied))
-            # TODO d correctly applied?
-            out = Applied(b.sym, tuple(d[a] for a in b.args))
+            out = apply_subst(b, d)
             assert(is_base(out))
             return out
 

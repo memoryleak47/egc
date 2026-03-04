@@ -69,3 +69,15 @@ def base_lt(l: Base, r: Base) -> bool:
     if isinstance(l, Var) and not isinstance(r, Var): return True
     if isinstance(r, Var) and not isinstance(l, Var): return False
     return l.sym < r.sym
+
+type Subst = dict[Var, Term]
+
+def apply_subst(t: Term, subst) -> Term:
+    if isinstance(t, Var):
+        if t in subst:
+            return subst[t]
+        else:
+            return t
+    args = tuple(apply_subst(a, subst) for a in t.args)
+    return Applied(t.sym, args)
+
