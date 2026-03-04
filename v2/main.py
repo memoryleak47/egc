@@ -70,8 +70,10 @@ class EGC:
         while len(self.passives) > 0:
             self.dump()
             x, y = self.passives.pop(0)
+            print(f"Handling passive {x} = {y}!")
             x = self.canon(x)
             y = self.canon(y)
+            print(f"  updates to {x} = {y}!")
             self.suf.union(x, y)
 
         self.check_goals()

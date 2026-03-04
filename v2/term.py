@@ -39,6 +39,9 @@ class Applied:
 class Var:
     i: int
 
+    def __post_init__(self):
+        assert(isinstance(self.i, int))
+
     def __repr__(self):
         return "X" + str(self.i)
 
