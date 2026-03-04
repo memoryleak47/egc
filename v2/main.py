@@ -39,12 +39,14 @@ class EGC:
                 self.add_hashcons_eq(t, rhs)
 
             b = self.hashcons[t]
-            out = apply_subst(b, d)
+            assert(is_base(b))
+            out = apply_subst(b, rev(d))
             assert(is_base(out))
             return out
 
     def add_hashcons_eq(self, lhs: Term, rhs: Base):
         self.hashcons[lhs] = rhs
+        assert(is_base(rhs))
         print(f"hashcons: {lhs} -> {rhs}")
         e1 = (lhs, rhs)
         for e2 in self.hashcons.items():

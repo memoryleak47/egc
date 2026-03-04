@@ -22,6 +22,12 @@ def reorder(bases: tuple(Base)) -> (dict[Var, Var], tuple(Base)):
 
     return d, out
 
+def rev(x: dict[Var, Var]) -> dict[Var, Var]:
+    d = {}
+    for (k, v) in x.items():
+        d[v] = k
+    return d
+
 def var_sequence(t: Term) -> list[Var]:
     if isinstance(t, Var):
         return [t]
