@@ -20,6 +20,9 @@ class Id:
     def __repr__(self):
         return "id" + str(self.i)
 
+    def __lt__(self, other: Id) -> bool:
+        return self.i < other.i
+
 @dataclass(frozen=True)
 class Var:
     v: int
