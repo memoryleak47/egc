@@ -86,8 +86,9 @@ class EGC:
         for v in list(poly.vars):
             if v not in app_id.args:
                 vars2 = poly.vars.copy()
+                count = vars2[v]
                 del vars2[v]
-                poly = Polynomial(poly.constant + 1, vars2)
+                poly = Polynomial(poly.constant + count, vars2)
 
         assert(set(poly.vars) == set(app_id.args))
 
