@@ -73,6 +73,7 @@ class EGC:
     def update_weight(self, e: Equation):
         body, app_id = e
         if not is_applied_sym(app_id): return
+        if not isinstance(app_id.f, Id): return
         app_id, body = canon((app_id, body))
         i = app_id.f
 
@@ -80,16 +81,18 @@ class EGC:
         assert(app_id.args == tuple(Var(x) for x in range(len(app_id.args))))
 
         poly = poly_of(body, self.weights)
+
+        # Redundancy! If we have `f(X, g(Y)) = id5(X)`, then the polynomial of id5 should be X+3, as the Y gets redundant.
+        for v in list(poly.vars):
+            if v not in app_id.args:
+                vars2 = poly.vars.copy()
+                del vars2[v]
+                poly = Polynomial(poly.constant + 1, vars2)
+
+        assert(set(poly.vars) == set(app_id.args))
+
         if (i not in self.weights) or poly < self.weights[i]:
-            if isinstance(i, Id):
-                for v in list(poly.vars):
-                    # Redundancy! If we have `f(X, g(Y)) = id5(X)`, then the polynomial of id5 should be X+3, as the Y gets redundant.
-                    if v not in app_id.args:
-                        vars2 = poly.vars.copy()
-                        del vars2[v]
-                        poly = Polynomial(poly.constant + 1, vars2)
-                assert(len(poly.vars) == len(app_id.args))
-                self.weights[i] = poly
+            self.weights[i] = poly
 
     def run(self):
         while self.passives:
