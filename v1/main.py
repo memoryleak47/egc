@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from term import *
+from poly import *
 from deduce import *
 from parse import *
 from canon import *
@@ -24,9 +25,9 @@ def gt(l: Term, r: Term) -> bool:
     return sym_gt(l.f, r.f)
 
 def sym_gt(l: Symbol, r: Symbol) -> bool:
-    # int > str
-    if isinstance(l, int) and isinstance(r, str): return True
-    if isinstance(l, str) and isinstance(r, int): return False
+    # Id > str
+    if isinstance(l, Id) and isinstance(r, str): return True
+    if isinstance(l, str) and isinstance(r, Id): return False
     return l > r
 
 class EGC:
@@ -76,7 +77,10 @@ class EGC:
         i = app_id.f
         poly = poly_of(body, self.weights)
         if (i not in self.weights) or poly < self.weights[i]:
-            self.weights[i] = poly
+            if isinstance(i, Id):
+                # TODO fix this bug! This is where redundancy should happen in the polynomials.
+                assert(len(poly.vars) <= len(app_id.args))
+                self.weights[i] = poly
 
     def run(self):
         while self.passives:
