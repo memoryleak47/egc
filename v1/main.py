@@ -75,11 +75,20 @@ class EGC:
         if not is_applied_sym(app_id): return
         app_id, body = canon((app_id, body))
         i = app_id.f
+
+        # app_id should be in "default" application.
+        assert(app_id.args == tuple(Var(x) for x in range(len(app_id.args))))
+
         poly = poly_of(body, self.weights)
         if (i not in self.weights) or poly < self.weights[i]:
             if isinstance(i, Id):
-                # TODO fix this bug! This is where redundancy should happen in the polynomials.
-                assert(len(poly.vars) <= len(app_id.args))
+                for v in list(poly.vars):
+                    # Redundancy! If we have `f(X, g(Y)) = id5(X)`, then the polynomial of id5 should be X+3, as the Y gets redundant.
+                    if v not in app_id.args:
+                        vars2 = poly.vars.copy()
+                        del vars2[v]
+                        poly = Polynomial(poly.constant + 1, vars2)
+                assert(len(poly.vars) == len(app_id.args))
                 self.weights[i] = poly
 
     def run(self):
@@ -119,6 +128,6 @@ class EGC:
             goals.append(g2)
         self.goals = goals
 
-eqs, diseqs = parse("../example.p")
+eqs, diseqs = parse("../example_7_1.p")
 e = EGC(eqs, diseqs)
 e.run()
