@@ -56,7 +56,6 @@ class EGC:
                 s = vars_of(lhs).intersection(vars_of(rhs))
                 i = Node(Id(self.next_id), tuple(s))
                 self.next_id += 1
-
                 self.add_active((lhs, i))
                 self.add_active((rhs, i))
 
@@ -77,6 +76,6 @@ class EGC:
             goals.append(g2)
         self.goals = goals
 
-eqs, diseqs = parse("../example_7_5.p")
+eqs, diseqs = parse("../group.p")
 e = EGC(eqs, diseqs)
 e.run()

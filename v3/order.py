@@ -36,7 +36,10 @@ def weight(t: Term) -> int:
     if isinstance(t, Var):
         return 1
     elif isinstance(t, Node):
-        return 1 + sum(map(weight, t.args))
+        if t.f == "n":
+          return sum(map(weight, t.args))
+        else:
+          return 1 + sum(map(weight, t.args))
     else:
         raise "oh no"
 
@@ -57,4 +60,7 @@ def sym_gt(l: Symbol, r: Symbol) -> bool:
     # Id > str
     if isinstance(l, Id) and isinstance(r, str): return True
     if isinstance(l, str) and isinstance(r, Id): return False
+    # hardcoded precedence
+    prec = ["n","m","e"]
+    if isinstance(l, str) and isinstance(r, str): return prec.index(l) < prec.index(r)
     return l > r
