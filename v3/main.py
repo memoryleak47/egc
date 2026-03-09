@@ -26,7 +26,7 @@ class EGC:
             self.passives.extend(deduce(e2, e))
 
     def score_passive(self, e: Equation):
-        return 1
+        return weight(e[0]) + weight(e[1])
 
     def pop_passive(self):
         best = None
