@@ -12,7 +12,6 @@ class EGC:
         self.passives = eqs
         self.next_id = 0
         self.goals = goals
-        self.weights = {} # dict[Id, Polynomial]
 
     def add_active(self, e: Equation):
         e = canon(e)

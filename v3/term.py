@@ -32,14 +32,6 @@ class Var:
 
 type Term = Node | Var
 
-# An AppliedSym is a sym applied to a disjoint set of variables.
-type AppliedSym = Node
-
-def is_applied_sym(t: Term) -> bool:
-    if not isinstance(t, Node): return False
-    if not all(isinstance(x, Var) for x in t.args): return False
-    return len(set(t.args)) == len(t.args)
-
 type Equation = (Term, Term) # s = t
 type Goal = (Term, Term) # s != t
 
