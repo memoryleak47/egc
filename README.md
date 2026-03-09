@@ -17,3 +17,8 @@ Takeaway from the experiment:
 -- I think this only works, due to the CP scoring function that associates a "weight" to applied ids corresponding to the terms they represent
 - Maybe there is a way to make this work more efficiently, by restricting what "definitions" you add, or by restricting what CPs/facts we generate
 - Potential advantage: a "step" could be implemented much more efficiently (i.e. locally) in a fully hashconsed system than in a term-based system
+
+Implementations:
+- v1: purely term-rewriting based
+- v2: based on slotted e-graph
+- v3: knuth-bendix completion, and only add ids incase you can't orient
